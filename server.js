@@ -1,4 +1,3 @@
-// backend/server.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -8,7 +7,6 @@ const { pool, testConnection } = require('./config/database');
 
 const app = express();
 
-// ✅ CORS bien configurado y aplicado antes de cualquier ruta
 const corsOptions = {
   origin: 'http://localhost:3000',
   credentials: true,
@@ -30,11 +28,9 @@ testConnection().then(isConnected => {
   }
 });
 
-// ✅ Asegúrate de que esta ruta existe
 const apiRoutes = require('./routes/apiRoutes');
 app.use('/api', apiRoutes);
 
-// Manejo de errores
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Algo salió mal!' });

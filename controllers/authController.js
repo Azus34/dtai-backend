@@ -57,11 +57,36 @@ const authController = {
         [user.id]
       );
 
+      // Obtener datos adicionales si es docente
+      let userData = {
+        id: user.id,
+        nombre: user.nombre,
+        email: user.email,
+        rol: user.rol
+      };
+      
+      // Si es docente, obtener información adicional
+      if (user.rol === 'docente' && user.docente_id) {
+        try {
+          const docenteData = await db.query(
+            'SELECT * FROM docentes WHERE id = ?',
+            [user.docente_id]
+          );
+          
+          if (docenteData && docenteData.length > 0) {
+            userData.docente = docenteData[0];
+          }
+        } catch (err) {
+          console.error('Error obteniendo datos de docente:', err);
+        }
+      }
+
       // Crear token JWT
       const token = jwt.sign(
         {
           id: user.id,
-          rol: user.rol
+          rol: user.rol,
+          docente_id: user.docente_id || null
         },
         process.env.JWT_SECRET || 'fallback_secret_key',
         { expiresIn: '8h' }
@@ -70,12 +95,7 @@ const authController = {
       // Respuesta exitosa
       return res.json({
         token,
-        user: {
-          id: user.id,
-          nombre: user.nombre,
-          email: user.email,
-          rol: user.rol
-        }
+        user: userData
       });
 
     } catch (error) {
